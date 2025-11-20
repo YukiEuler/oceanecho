@@ -10,7 +10,7 @@ import seaborn as sns
 import cv2
 import os
 import timm
-import gdown
+from huggingface_hub import hf_hub_download
 import requests
 from pathlib import Path
 import json
@@ -70,29 +70,35 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-def download_from_gdrive():
-    """Download models dari Google Drive"""
-    
-    # Buat folder models
+def download_from_huggingface():
+    """Download models from Hugging Face Hub"""
     os.makedirs('models', exist_ok=True)
     
-    # Dictionary: {file_id: filename}
-    model_files = {
-        '1BOznuuR3MpLg4QE1k22HiTe7saSRRKJX': 'marine_model_fold_0_best.pth',
-        '16eXNLX2v-CNe1jwbsP8bMaolJGRbi0-I': 'marine_model_fold_1_best.pth',
-        '1NTULLK9KDLw20qYnjHt-PG_kl-5-AJGn': 'marine_model_fold_2_best.pth',
-        '1WE7MjdraUTV94oV-9LurLhQN9PL_bjIK': 'marine_model_fold_3_best.pth',
-        '1Jyhrxg24bcAqBbKBr7wTCogw_u7Stzmp': 'marine_model_fold_4_best.pth',
-    }
+    repo_id = "HyacinthiaIca/OceanEcho"  # Replace with your repo
     
-    for file_id, filename in model_files.items():
+    model_files = [
+        'marine_model_fold_0_best.pth',
+        'marine_model_fold_1_best.pth',
+        'marine_model_fold_2_best.pth',
+        'marine_model_fold_3_best.pth',
+        'marine_model_fold_4_best.pth',
+    ]
+    
+    for filename in model_files:
         output_path = f'models/{filename}'
         
         if not os.path.exists(output_path):
             print(f"Downloading {filename}...")
-            url = f'https://drive.google.com/uc?id={file_id}'
-            gdown.download(url, output_path, quiet=False)
-            print(f"✅ Downloaded {filename}")
+            try:
+                hf_hub_download(
+                    repo_id=repo_id,
+                    filename=filename,
+                    local_dir='models',
+                    local_dir_use_symlinks=False
+                )
+                print(f"✅ Downloaded {filename}")
+            except Exception as e:
+                print(f"❌ Failed: {e}")
         else:
             print(f"⏭️ {filename} already exists")
 
@@ -756,5 +762,5 @@ def main():
     """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
-    download_from_gdrive()
+    download_from_huggingface()
     main()
